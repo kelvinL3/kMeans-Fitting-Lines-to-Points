@@ -5,7 +5,31 @@ from numpy import linalg as LA
 import math
 import sys
 
+# takes in a matrix representation of the edges of an image
+# edges are marked with 1s, 0s everywhere else
+# returns a list of the pixels where the edges are
+def preprocessing():
+	# Il = sio.loadmat('figure2-1.mat')
+	Il = sio.loadmat('edges.mat')
+	I = Il['bw05']
+	# print(I)
 
+	# plt.matshow(I)
+	plt.imshow(I, cmap='Greys')
+	# plt.show()
+
+	I = np.array(I)
+
+	# turn everything into points
+	points = []
+	it = np.nditer(I, flags=['multi_index'])
+	while not it.finished:
+		if it[0].item(0) is not 0:
+			points.append(Point(it.multi_index[0],it.multi_index[1]))
+		it.iternext()
+	return points
+
+# represents a pixel on the edge
 class Point:
 	def __init__(self, x, y):
 		self.x = x
@@ -14,6 +38,7 @@ class Point:
 		return "("+str(self.x)+" ,"+str(self.y)+")"
 	__repr__ = __str__
 
+# class for assigning the points to the lines
 class P1:
 	@staticmethod
 	def assign_points_to_lines(points, lines, buckets):
@@ -39,6 +64,7 @@ class P1:
 		# print("distance is", x, "   ", p.x, line[0], p.y, line[1], line[2])
 		return x 
 
+# class for changing the lines to fit the points
 class P2:
 	@staticmethod
 	def update_lines(lines, buckets):
@@ -88,49 +114,22 @@ class P2:
 			length += 1
 		return ans/length
 		
-	
 def delete_buckets(buckets):
 	del buckets[0][:]
 	del buckets[1][:]
 	del buckets[2][:]
 
 
-def preprocessing():
-	# Il = sio.loadmat('figure2-1.mat')
-	Il = sio.loadmat('edges.mat')
-	I = Il['bw05']
-	print(I)
 
-	# plt.matshow(I)
-	plt.imshow(I, cmap='Greys')
-	# plt.show()
-
-	I = np.array(I)
-
-	# turn everything into points
-	points = []
-	it = np.nditer(I, flags=['multi_index'])
-	while not it.finished:
-		if it[0].item(0) is not 0:
-			points.append(Point(it.multi_index[0],it.multi_index[1]))
-		it.iternext()
-	return points
 	
 points = preprocessing()
-print(points)
+# print(points)
 
 # initialize
 lines = [[0 for x in range(3)] for y in range(3)] 
+
+# these lines arent really necessary, but just helps show that the equations of the lines are indeed moving
 for i in range(3):
-	# t = 2*math.pi*np.random.random()
-	# a = math.cos(t)
-	# b = math.sin(t)
-	# r = (177+114)*np.random.random() - 114
-	# d = math.sqrt(a**2 + b**2)
-	# lines[i][0] = a / d
-	# lines[i][1] = b / d
-	# lines[i][2] = r / d
-	
 	lines[i][0] = np.random.random()
 	lines[i][1] = np.random.random()
 	lines[i][2] = np.random.random()
@@ -147,7 +146,7 @@ converge_times = 20
 iterations = 0
 
 
-print("Initial Lines Configuration")
+print("\nInitial Lines Configuration")
 print(lines[0])
 print(lines[1])
 print(lines[2])
@@ -165,12 +164,12 @@ while True:
 		P1.assign_points_to_lines(points, lines, buckets)
 		
 		if prev[0] is len(buckets[0]) and prev[1] is len(buckets[1]) and prev[2] is len(buckets[2]):
-			print("Converge???")
+			# print("Converge???")
 			converge_times-=1
 			if converge_times is 0:
 				print("FINAL CONVERGE")
 				break
-		print("length of buckets", len(buckets[0]), len(buckets[1]), len(buckets[2]))
+		# print("length of buckets", len(buckets[0]), len(buckets[1]), len(buckets[2]))
 		prev[0] = len(buckets[0])
 		prev[1] = len(buckets[1])
 		prev[2] = len(buckets[2])
@@ -178,7 +177,28 @@ while True:
 	
 	break
 
-print("Took", iterations, "Iterations")
+print("\nTook", iterations, "Iterations")
 print(lines[0])
 print(lines[1])
 print(lines[2])
+
+
+
+
+# # for graphing 
+# def graph(function):
+# 	x = np.array(range(0,80))  
+# 	y = eval(function)
+# 	plt.plot(x, y) 
+
+# graph('-3.75/0.45 + (0.89/0.45)*x')
+# graph('3.735/0.894 + (0.45/0.894)*x')
+# graph('83.11/0.705 + (-	0.71/0.705)*x')
+
+
+# graph('-3.75/0.45 + (0.88/0.45)*x')
+# graph('6/0.91 + (0.41/0.91)*x')
+# graph('87/0.61 - (0.73/0.61)*x')
+
+
+# plt.show()
